@@ -1,9 +1,9 @@
 SET NAMES CYRL;
-create database 'D:\!\43501_4\!DB\my_DB\AUTO_SERVICES.sql' 
+create database 'D:\!\43501_4\!DB\my_DB\NEW_AUTO_SERVICES.sql' 
 user 'SYSDBA' password 'masterkey' 
 DEFAULT CHARACTER SET CYRL;
 
-connect 'D:\!\43501_4\!DB\my_DB\AUTO_SERVICES.sql' 
+connect 'D:\!\43501_4\!DB\my_DB\NEW_AUTO_SERVICES.sql' 
 user 'SYSDBA' password 'masterkey'; 
 commit;
 
@@ -157,6 +157,8 @@ VALUES ('Nissan');
 INSERT INTO motors (motor, type_of_motor, volume_motor, power, torque, consumption)
 VALUES ('М50' ,'Бензиновый' ,1991 , 450, 6000, 155); 
 
+
+
 INSERT INTO complete_set (equipment)
 VALUES ('Базовый'); 
 
@@ -176,5 +178,43 @@ VALUES (1, 1, 1, 10, 3950000);
 
 INSERT INTO service (model_car_id, type_of_fault, trade_id)
 VALUES (1,'Неисправна система выпуска отработавших газов' , 1);
+commit;
+
+
+
+
+
+
+
+
+CREATE TABLE transmission
+(transmission_id INTEGER NOT NULL PRIMARY KEY, transmission VARCHAR (100) NOT NULL);
+commit;
+
+CREATE GENERATOR gen_transmission_id;
+SET GENERATOR gen_transmission_id TO 0;
+set term !! ;
+CREATE TRIGGER transmission_bi FOR transmission 
+ACTIVE BEFORE INSERT POSITION 0 
+AS
+BEGIN
+NEW.transmission_id = GEN_ID(gen_transmission_id, 1); 
+END!!
+set term ; !!
+
+
+ALTER TABLE complete_set
+ADD motors_id INTEGER REFERENCES motors(motors_id);
+ALTER TABLE complete_set
+ADD transmission_id INTEGER REFERENCES transmission(transmission_id);
+ALTER TABLE complete_set
+ADD additional_options_id INTEGER REFERENCES additional_options(additional_options_id);
+
+INSERT INTO transmission(transmission)
+VALUES ('S54B32'); 
+commit;
+
+INSERT INTO complete_set(equipment, motors_id, transmission_id, additional_options_id)
+VALUES ('Базовый', 1, 1, 1); 
 commit;
 
