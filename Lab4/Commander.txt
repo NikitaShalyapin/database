@@ -1,0 +1,338 @@
+SET NAMES CYRL;
+create database 'D:\!\43501_4\!DB\my_DB\NEW_AUTO_SERVICES.sql' 
+user 'SYSDBA' password 'masterkey' 
+DEFAULT CHARACTER SET CYRL;
+
+connect 'D:\!\43501_4\!DB\my_DB\NEW_AUTO_SERVICES.sql' 
+user 'SYSDBA' password 'masterkey'; 
+commit;
+
+
+CREATE TABLE marks
+(marks_id INTEGER NOT NULL PRIMARY KEY, mark VARCHAR (16) NOT NULL);
+commit;
+
+CREATE TABLE motors
+(motors_id INTEGER NOT NULL PRIMARY KEY, motor VARCHAR (16) NOT NULL, type_of_motor VARCHAR (16), volume_motor FLOAT, power FLOAT, torque FLOAT, consumption FLOAT);
+commit;
+
+CREATE TABLE complete_set
+(complete_set_id INTEGER NOT NULL PRIMARY KEY, equipment VARCHAR (16) NOT NULL);
+commit;
+
+CREATE TABLE model_car
+(model_car_id INTEGER NOT NULL PRIMARY KEY, model_car VARCHAR (16) NOT NULL, marks_id INTEGER REFERENCES marks(marks_id), 
+motors_id INTEGER REFERENCES motors(motors_id), body_type VARCHAR (16), complete_set_id INTEGER REFERENCES complete_set(complete_set_id), 
+production_year INTEGER, number_of_seats INTEGER, place_vehicles VARCHAR (16));
+commit;
+
+CREATE TABLE customers
+(customers_id INTEGER NOT NULL PRIMARY KEY, customers VARCHAR (100) NOT NULL);
+commit;
+
+CREATE TABLE additional_options
+(additional_options_id INTEGER NOT NULL PRIMARY KEY, additional_options VARCHAR (16) NOT NULL, price FLOAT);
+commit;
+
+CREATE TABLE trade
+(trade_id INTEGER NOT NULL PRIMARY KEY, customers_id INTEGER REFERENCES customers(customers_id), 
+model_car_id INTEGER REFERENCES model_car(model_car_id), 
+additional_options_id INTEGER REFERENCES additional_options(additional_options_id),
+discount FLOAT, total_price FLOAT);
+commit;
+
+CREATE TABLE service
+(service_id INTEGER NOT NULL PRIMARY KEY, model_car_id INTEGER REFERENCES model_car(model_car_id),
+type_of_fault VARCHAR (100) , trade_id INTEGER REFERENCES trade(trade_id));
+commit;
+
+
+
+
+
+
+CREATE GENERATOR gen_marks_id;
+SET GENERATOR gen_marks_id TO 0;
+set term !! ;
+CREATE TRIGGER marks_bi FOR marks 
+ACTIVE BEFORE INSERT POSITION 0 
+AS
+BEGIN
+NEW.marks_id = GEN_ID(gen_marks_id, 1); 
+END!!
+set term ; !!
+
+
+CREATE GENERATOR gen_motors_id;
+SET GENERATOR gen_motors_id TO 0;
+set term !! ;
+CREATE TRIGGER motors_bi FOR motors 
+ACTIVE BEFORE INSERT POSITION 0 
+AS
+BEGIN
+NEW.motors_id = GEN_ID(gen_motors_id, 1); 
+END!!
+set term ; !!
+
+
+
+CREATE GENERATOR gen_complete_set_id;
+SET GENERATOR gen_complete_set_id TO 0;
+set term !! ;
+CREATE TRIGGER complete_set_bi FOR complete_set
+ACTIVE BEFORE INSERT POSITION 0 
+AS
+BEGIN
+NEW.complete_set_id = GEN_ID(gen_complete_set_id, 1); 
+END!!
+set term ; !!
+
+
+CREATE GENERATOR gen_model_car_id;
+SET GENERATOR gen_model_car_id TO 0;
+set term !! ;
+CREATE TRIGGER model_car_bi FOR model_car 
+ACTIVE BEFORE INSERT POSITION 0 
+AS
+BEGIN
+NEW.model_car_id = GEN_ID(gen_model_car_id, 1); 
+END!!
+set term ; !!
+
+
+CREATE GENERATOR gen_customers_id;
+SET GENERATOR gen_customers_id TO 0;
+set term !! ;
+CREATE TRIGGER customers_bi FOR customers 
+ACTIVE BEFORE INSERT POSITION 0 
+AS
+BEGIN
+NEW.customers_id = GEN_ID(gen_customers_id, 1); 
+END!!
+set term ; !!
+
+
+CREATE GENERATOR gen_additional_options_id;
+SET GENERATOR gen_additional_options_id TO 0;
+set term !! ;
+CREATE TRIGGER additional_options_bi FOR additional_options 
+ACTIVE BEFORE INSERT POSITION 0 
+AS
+BEGIN
+NEW.additional_options_id = GEN_ID(gen_additional_options_id, 1); 
+END!!
+set term ; !!
+
+
+CREATE GENERATOR gen_trade_id;
+SET GENERATOR gen_trade_id TO 0;
+set term !! ;
+CREATE TRIGGER trade_bi FOR trade 
+ACTIVE BEFORE INSERT POSITION 0 
+AS
+BEGIN
+NEW.trade_id = GEN_ID(gen_trade_id, 1); 
+END!!
+set term ; !!
+
+
+CREATE GENERATOR gen_service_id;
+SET GENERATOR gen_service_id TO 0;
+set term !! ;
+CREATE TRIGGER service_bi FOR service 
+ACTIVE BEFORE INSERT POSITION 0 
+AS
+BEGIN
+NEW.service_id = GEN_ID(gen_service_id, 1); 
+END!!
+set term ; !!
+
+
+
+INSERT INTO marks (mark)
+VALUES ('BMW'); 
+INSERT INTO marks (mark)
+VALUES ('Nissan');
+
+INSERT INTO motors (motor, type_of_motor, volume_motor, power, torque, consumption)
+VALUES ('М50' ,'Бензиновый' ,1991 , 450, 6000, 155); 
+
+
+
+INSERT INTO complete_set (equipment)
+VALUES ('Базовый'); 
+
+
+INSERT INTO model_car (model_car, marks_id, motors_id, body_type, complete_set_id,
+production_year, number_of_seats, place_vehicles )
+VALUES ('М3' ,1 ,1 ,'F80' ,1 ,2015 ,4 ,'Слева'); 
+
+INSERT INTO customers (customers)
+VALUES ('Васильев Вася Васичкин'); 
+
+INSERT INTO additional_options (additional_options, price)
+VALUES ('ABS', 90000); 
+
+INSERT INTO trade (customers_id, model_car_id, additional_options_id, discount, total_price)
+VALUES (1, 1, 1, 10, 3950000); 
+
+INSERT INTO service (model_car_id, type_of_fault, trade_id)
+VALUES (1,'Неисправна система выпуска отработавших газов' , 1);
+commit;
+
+
+
+
+
+
+
+
+CREATE TABLE transmission
+(transmission_id INTEGER NOT NULL PRIMARY KEY, transmission VARCHAR (100) NOT NULL);
+commit;
+
+CREATE GENERATOR gen_transmission_id;
+SET GENERATOR gen_transmission_id TO 0;
+set term !! ;
+CREATE TRIGGER transmission_bi FOR transmission 
+ACTIVE BEFORE INSERT POSITION 0 
+AS
+BEGIN
+NEW.transmission_id = GEN_ID(gen_transmission_id, 1); 
+END!!
+set term ; !!
+
+
+ALTER TABLE complete_set
+ADD motors_id INTEGER REFERENCES motors(motors_id);
+ALTER TABLE complete_set
+ADD transmission_id INTEGER REFERENCES transmission(transmission_id);
+ALTER TABLE complete_set
+ADD additional_options_id INTEGER REFERENCES additional_options(additional_options_id);
+
+INSERT INTO transmission(transmission)
+VALUES ('S54B32'); 
+commit;
+
+INSERT INTO complete_set(equipment, motors_id, transmission_id, additional_options_id)
+VALUES ('Базовый', 1, 1, 1); 
+commit;
+
+
+CREATE view MotorSelect as select * from motors;
+CREATE view MarksSelect as select * from marks;
+CREATE view Complete_setSelect as select * from complete_set;
+CREATE view Model_carSelect as select * from model_car;
+CREATE view CustomersSelect as select * from customers;
+CREATE view Additional_optionsSelect as select * from additional_options;
+CREATE view TradeSelect as select * from trade;
+CREATE view ServiceSelect as select * from service;
+CREATE view TransmissionSelect as select * from transmission;
+
+
+
+create view selectIvanov as select * from customers where customers like 'Ivanov % ' ;
+create view selectOptPrice as select * from additional_options where price between 10000 and 80000;
+create view selectMotorType as select * from motors where "TYPE_OF_MOTOR" in ('V6', 'V8 ');
+
+
+create view selectMotrSort as select * from motors order by motor asc , type_of_motor asc ,
+volume_motor asc, power asc;
+
+
+create view selectAllCars as select Marks.mark as marks, model_car.model_car as model_car,
+model_car.production_year as "Year" from marks, model_car where Marks.marks_id = model_car.marks_id;
+
+create view selectAllClients as select customers.customers_id as id, Marks.mark as mark,
+model_car as Model, trade.discount as Discount from customers
+, Marks, model_car, trade where trade. customers_id = customers.customers_id and marks.marks_id = model_car. marks_id;
+
+create view selectMotorsTypes as select motors.type_of_motor as "Type",
+COUNT (motors.type_of_motor) as "Count" from motors group by motors.type_of_motor;
+
+create view selectUnusedModelCar as select * from model_car where model_car_id not in
+(select model_car_id from trade);
+
+
+
+create procedure ins_mark (i INTEGER, e varchar(255))
+as
+begin
+insert into marks (marks_id, mark) values (:i, :e);
+end;
+
+create procedure ins_mark (i INTEGER, e varchar(255))
+as
+begin
+insert into marks (marks_id, mark) values (:i, :e);
+end;
+
+
+
+create procedure ins_motors (i INTEGER, e varchar(16), t VARCHAR (16), v FLOAT, p FLOAT, y FLOAT, c FLOAT)
+as
+begin
+insert into motors (motors_id , motor , type_of_motor , volume_motor, power , torque, consumption )
+values (:i, :e, :t, :v,  :p, :y, :c);
+end;
+
+create procedure ins_complete_set (i INTEGER, e varchar(16), t INTEGER, v INTEGER, p INTEGER)
+as
+begin
+insert into complete_set (complete_set_id , equipment , motors_id, transmission_id, additional_options_id)
+values (:i, :e, :t, :v,  :p);
+end;
+
+create procedure ins_model_car (m INTEGER , r VARCHAR (16) ,d INTEGER ,i INTEGER , b VARCHAR (16), f INTEGER ,p INTEGER, n INTEGER, y VARCHAR (16))
+as
+begin
+insert into model_car (model_car_id , model_car , marks_id ,
+motors_id , body_type , complete_set_id,
+production_year , number_of_seats , place_vehicles)
+values (:m, :r, :d, :i, :b , :f, :p, :n , :y );
+end;
+
+create procedure ins_customers (i INTEGER, e varchar(100))
+as
+begin
+insert into customers (customers_id , customers )
+values (:i, :e);
+end;
+
+create procedure ins_additional_options (i INTEGER, e varchar(100),p FLOAT)
+as
+begin
+insert into additional_options(additional_options_id , additional_options , price )
+values (:i, :e, :p);
+end;
+
+create procedure ins_trade (i INTEGER, e INTEGER,p INTEGER, l INTEGER, k float, u float)
+as
+begin
+insert into trade(trade_id ,customers_id,model_car_id ,additional_options_id ,
+discount , total_price )
+values (:i, :e, :p, :l,  :k, :u );
+end;
+
+
+
+create procedure ins_service (i INTEGER, e INTEGER,p varchar(100), l INTEGER)
+as
+begin
+insert into service(service_id, model_car_id,
+type_of_fault , trade_id)
+values (:i, :e, :p, :l);
+end;
+
+create procedure ins_transmission (i INTEGER, e varchar(255))
+as
+begin
+insert into transmission (transmission_id , transmission )
+values (:i, :e);
+end;
+
+
+
+
+
+
