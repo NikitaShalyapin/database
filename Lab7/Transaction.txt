@@ -1,0 +1,61 @@
+create database 'D:\!\43501_4\!DB\my_DB\Finish\transaction.sql' 
+user 'SYSDBA' password 'masterkey' 
+DEFAULT CHARACTER SET CYRL;
+
+connect 'D:\!\43501_4\!DB\my_DB\Finish\transaction.sql' 
+user 'SYSDBA' password 'masterkey'; 
+commit;
+
+create table car (id integer, name VARCHAR (16));
+commit;
+
+INSERT INTO car (id, name)
+VALUES (1,'Lada'); 
+commit;
+INSERT INTO car (id, name)
+VALUES (2,'Niva');
+savepoint y;
+
+delete from car;
+select * from car;
+
+rollback to y;
+select * from car;
+commit;
+
+
+
+
+
+set transaction snapshot;
+INSERT INTO car (id, name)
+VALUES (3,'gaz');
+
+
+set transaction snapshot table stability;
+INSERT INTO car (id, name)
+VALUES (4,'vaz');
+
+INSERT INTO car (id, name)
+VALUES (5,'maz');
+
+
+set transaction read committed;
+
+INSERT INTO car (id, name)
+VALUES (6,'paz');
+commit;
+
+INSERT INTO car (id, name)
+VALUES (7,'kraz');
+commit;
+
+set transaction read committed no record_version wait;
+
+INSERT INTO car (id, name)
+VALUES (8,'uaz');
+
+set transaction read committed no record_version no wait;
+
+INSERT INTO car (id, name)
+VALUES (9,'taz');

@@ -1,0 +1,31 @@
+create procedure ProbSelect3
+returns (num float, compset varchar(255)) as
+declare variable i int ;
+declare variable j int ;
+declare variable price float ;
+declare variable compset  varchar(255) ;
+
+begin
+    for  select car.complete_set_link_id as id_comp_set_link from car , marks
+    where marks.mark = 'Lada' and marks.marks_id = car.marks_id into :i
+    do
+    begin
+        for select complete_set_link.additional_options_id as id_add_opt from  complete_set_link
+        where complete_set_link.complete_set_link_id = :i into :j
+          do
+          begin
+             for select trade_additional_options.price as Prise, complete_set.equipment  as Compset
+             from trade_additional_options,  complete_set_link, complete_set
+             where trade_additional_options.additional_options_id = :j
+                  and complete_set.complete_set_id = complete_set_link.complete_set_id
+                  and trade_additional_options.additional_options_id = complete_set_link.additional_options_id into : price, :compset
+                    do
+                    begin
+                         for  select  AVG(price) from
+
+               group by trade_additional_options.price ,complete_set.equipment
+            into :num ,  :compset
+            do suspend ;
+            end
+     end
+end

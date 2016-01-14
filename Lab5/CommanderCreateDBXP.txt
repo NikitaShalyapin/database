@@ -1,50 +1,103 @@
 SET NAMES CYRL;
-create database 'D:\!\43501_4\!DB\my_DB\AUTO_SERVICES_XP.sql' 
+create database 'D:\!\43501_4\!DB\my_DB\Finish\AUTO_SERVICES_ALL.sql' 
 user 'SYSDBA' password 'masterkey' 
 DEFAULT CHARACTER SET CYRL;
 
-connect 'D:\!\43501_4\!DB\my_DB\AUTO_SERVICES_XP.sql' 
+connect 'D:\!\43501_4\!DB\my_DB\Finish\AUTO_SERVICES_ALL.sql' 
 user 'SYSDBA' password 'masterkey'; 
 commit;
 
 
 CREATE TABLE marks
-(marks_id INTEGER NOT NULL PRIMARY KEY, mark VARCHAR (16) NOT NULL);
+(marks_id INTEGER NOT NULL PRIMARY KEY, 
+mark VARCHAR (16) NOT NULL);
 commit;
 
 CREATE TABLE motors
-(motors_id INTEGER NOT NULL PRIMARY KEY, motor VARCHAR (16) NOT NULL, type_of_motor VARCHAR (16), volume_motor FLOAT, power FLOAT, torque FLOAT, consumption FLOAT);
+(motors_id INTEGER NOT NULL PRIMARY KEY, 
+motor VARCHAR (16) NOT NULL, 
+type_of_motor VARCHAR (16), 
+volume_motor FLOAT, 
+power FLOAT, 
+torque FLOAT, 
+consumption FLOAT);
 commit;
 
-CREATE TABLE complete_set
-(complete_set_id INTEGER NOT NULL PRIMARY KEY, equipment VARCHAR (16) NOT NULL);
-commit;
 
 CREATE TABLE model_car
-(model_car_id INTEGER NOT NULL PRIMARY KEY, model_car VARCHAR (16) NOT NULL, marks_id INTEGER REFERENCES marks(marks_id), 
-motors_id INTEGER REFERENCES motors(motors_id), body_type VARCHAR (16), complete_set_id INTEGER REFERENCES complete_set(complete_set_id), 
-production_year INTEGER, number_of_seats INTEGER, place_vehicles VARCHAR (16),price FLOAT);
+(model_car_id INTEGER NOT NULL PRIMARY KEY, 
+model_car VARCHAR (16) NOT NULL);
 commit;
 
+CREATE TABLE transmission
+(transmission_id INTEGER NOT NULL PRIMARY KEY, 
+transmission VARCHAR (16) NOT NULL);
+commit;
+
+
 CREATE TABLE customers
-(customers_id INTEGER NOT NULL PRIMARY KEY, customers VARCHAR (100) NOT NULL);
+(customers_id INTEGER NOT NULL PRIMARY KEY, 
+customers VARCHAR (100) NOT NULL);
 commit;
 
 CREATE TABLE additional_options
-(additional_options_id INTEGER NOT NULL PRIMARY KEY, additional_options VARCHAR (16) NOT NULL, price FLOAT);
+(additional_options_id INTEGER NOT NULL PRIMARY KEY, 
+additional_options VARCHAR (16) NOT NULL, 
+price FLOAT);
+commit;
+
+
+CREATE TABLE complete_set
+(complete_set_id INTEGER NOT NULL PRIMARY KEY, 
+equipment VARCHAR (16) NOT NULL);
+commit;
+
+
+CREATE TABLE complete_set_link
+(complete_set_link_id INTEGER NOT NULL PRIMARY KEY,
+complete_set_id INTEGER REFERENCES complete_set(complete_set_id),
+motors_id INTEGER REFERENCES motors(motors_id), 
+transmission_id INTEGER REFERENCES transmission(transmission_id),
+additional_options_id INTEGER REFERENCES additional_options(additional_options_id));
+commit;
+
+
+CREATE TABLE car
+(car_id INTEGER NOT NULL PRIMARY KEY, 
+model_car INTEGER REFERENCES model_car(model_car_id), 
+marks_id INTEGER REFERENCES marks(marks_id), 
+body_type VARCHAR (16), 
+complete_set_link_id INTEGER REFERENCES complete_set_link(complete_set_link_id), 
+production_year INTEGER, 
+number_of_seats INTEGER, 
+place_vehicles VARCHAR (16),
+price FLOAT);
 commit;
 
 CREATE TABLE trade
-(trade_id INTEGER NOT NULL PRIMARY KEY, customers_id INTEGER REFERENCES customers(customers_id), 
-model_car_id INTEGER REFERENCES model_car(model_car_id), 
-discount FLOAT, total_price FLOAT);
+(trade_id INTEGER NOT NULL PRIMARY KEY, 
+customers_id INTEGER REFERENCES customers(customers_id), 
+car_id INTEGER REFERENCES car(car_id), 
+discount FLOAT, 
+total_price FLOAT);
 commit;
+
+
+CREATE TABLE trade_additional_options
+(trade_additional_options_id INTEGER NOT NULL PRIMARY KEY,
+additional_options_id INTEGER REFERENCES additional_options(additional_options_id),
+trade_id INTEGER REFERENCES trade(trade_id),
+price FLOAT);
+commit;
+
+
 
 CREATE TABLE service
-(service_id INTEGER NOT NULL PRIMARY KEY, model_car_id INTEGER REFERENCES model_car(model_car_id),
-type_of_fault VARCHAR (100) , trade_id INTEGER REFERENCES trade(trade_id));
+(service_id INTEGER NOT NULL PRIMARY KEY, 
+car_id INTEGER REFERENCES car(car_id),
+type_of_fault VARCHAR (100) , 
+trade_id INTEGER REFERENCES trade(trade_id));
 commit;
-
 
 
 
@@ -87,14 +140,14 @@ END!!
 set term ; !!
 
 
-CREATE GENERATOR gen_model_car_id;
-SET GENERATOR gen_model_car_id TO 0;
+CREATE GENERATOR gen_car_id;
+SET GENERATOR gen_car_id TO 0;
 set term !! ;
-CREATE TRIGGER model_car_bi FOR model_car 
+CREATE TRIGGER car_bi FOR car 
 ACTIVE BEFORE INSERT POSITION 0 
 AS
 BEGIN
-NEW.model_car_id = GEN_ID(gen_model_car_id, 1); 
+NEW.car_id = GEN_ID(gen_car_id, 1); 
 END!!
 set term ; !!
 
@@ -150,9 +203,6 @@ set term ; !!
 
 
 
-CREATE TABLE transmission
-(transmission_id INTEGER NOT NULL PRIMARY KEY, transmission VARCHAR (100) NOT NULL);
-commit;
 
 CREATE GENERATOR gen_transmission_id;
 SET GENERATOR gen_transmission_id TO 0;
@@ -166,29 +216,18 @@ END!!
 set term ; !!
 
 
-ALTER TABLE complete_set
-ADD motors_id INTEGER REFERENCES motors(motors_id);
-ALTER TABLE complete_set
-ADD transmission_id INTEGER REFERENCES transmission(transmission_id);
-ALTER TABLE complete_set
-ADD additional_options_id INTEGER REFERENCES additional_options(additional_options_id);
+CREATE GENERATOR gen_model_car_id;
+SET GENERATOR gen_model_car_id TO 0;
+set term !! ;
+CREATE TRIGGER model_car_bi FOR model_car 
+ACTIVE BEFORE INSERT POSITION 0 
+AS
+BEGIN
+NEW.model_car_id = GEN_ID(gen_model_car_id, 1); 
+END!!
+set term ; !!
 
 
-
-
-
-
-
-
-
-
-
-
-CREATE TABLE trade_additional_options
-(trade_additional_options_id INTEGER NOT NULL PRIMARY KEY, 
-additional_options_id INTEGER REFERENCES additional_options(additional_options_id),
-trade_id INTEGER REFERENCES trade(trade_id),price FLOAT) ;
-commit;
 
 CREATE GENERATOR gen_trade_additional_options_id;
 SET GENERATOR gen_trade_additional_options_id TO 0;
@@ -200,4 +239,19 @@ BEGIN
 NEW.trade_additional_options_id = GEN_ID(gen_trade_additional_options_id, 1); 
 END!!
 set term ; !!
+commit;
+
+
+
+CREATE GENERATOR gen_complete_set_link_id;
+SET GENERATOR gen_complete_set_link_id TO 0;
+set term !! ;
+CREATE TRIGGER complete_set_link_bi FOR complete_set_link 
+ACTIVE BEFORE INSERT POSITION 0 
+AS
+BEGIN
+NEW.complete_set_link_id = GEN_ID(gen_complete_set_link_id, 1); 
+END!!
+set term ; !!
+
 commit;

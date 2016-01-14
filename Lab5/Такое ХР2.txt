@@ -1,0 +1,26 @@
+create procedure NewProbSelect
+returns (num int, price float) as
+begin
+    select first 3 trade.customers_id as id_cust , trade.total_price as t_price
+    from trade
+    where trade.data_trade between '2000 -01 -01 ' and '2014 -01 -01 '
+          and trade.customers_id = customers.customers_id
+               group by trade.customers_id  order by t_price desc
+            into :num ,  :price
+end ;
+
+
+
+
+create procedure newselectprob
+returns (num int, price float) as
+
+begin
+select first 3 id_cust as id_cus,t_price as t_pr
+  from (select trade.customers_id as id_cust , trade.total_price as t_price
+    from trade ,customers
+    where trade.customers_id = customers.customers_id
+          and trade.data_trade between '2015-12-26' and '2016-01-23')
+        group by id_cus  order by t_pr desc
+        into :num ,  :price ;
+end
