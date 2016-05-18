@@ -1,0 +1,58 @@
+mysql -uroot -p
+
+CREATE DATABASE database bug_tracker_for_bd;
+
+show tables;
+
+use bug_tracker_for_bd;
+DROP DATABASE bug_tracker_for_bd;
+
+SELECT * FROM `errors`;
+SELECT * FROM `fixed_errors`;
+SELECT * FROM `project_files`;
+SELECT * FROM `projects`;
+SELECT * FROM `users`;
+SELECT * FROM `users_role_prog`;
+SELECT * FROM `role`;
+
+DELETE  FROM `errors`;
+DELETE  FROM `fixed_errors`;
+DELETE  FROM `project_files`;
+DELETE  FROM `projects`;
+DELETE  FROM `users`;
+
+INSERT INTO `users` (`id`, `name`, `password`) 
+VALUES ('1', 'tester', 'tester' );
+
+INSERT INTO `users` (`id`, `name`, `password`) 
+VALUES ('2', 'developer', 'developer' );
+
+INSERT INTO `role` (`id`, `name`)
+VALUES ('1', 'tester');
+
+INSERT INTO `role` (`id`, `name`)
+VALUES ('2', 'developer');
+
+INSERT INTO `projects` (`id`, `Name`)
+VALUES ('1', 'prog1');
+
+INSERT INTO `projects` (`id`, `Name`)
+VALUES ('2', 'prog2');
+
+INSERT INTO `users_role_prog` (`id`, `id_user`, `id_role`, `id_prog`)
+VALUES ('1', '2', '2', '1');
+
+INSERT INTO `users_role_prog` (`id`, `id_user`, `id_role`, `id_prog`)
+VALUES ('2', '2', '2', '2');
+
+INSERT INTO `users_role_prog` (`id`, `id_user`, `id_role`, `id_prog`)
+VALUES ('3', '1', '1', '1');
+
+INSERT INTO `users_role_prog` (`id`, `id_user`, `id_role`, `id_prog`)
+VALUES ('4', '1', '1', '2');
+
+
+select role.name from role, users_role_prog, users, projects where users.id=1 and projects.id=1 and users.id=users_role_prog.id_user and role.id=users_role_prog.id_role  and projects.id=users_role_prog.id_prog;
+
+select errors.id, projects.name, project_files.file, errors.description from errors, projects, project_files where projects.id = 2 and project_files.id = errors.file and project_files.project = 2  and errors.id not in (select fixed_errors.error from fixed_errors); 
+
